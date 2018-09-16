@@ -27,7 +27,7 @@ def text_speech(filename, text, locale="ja"):
         if locale == "ja":
             voice = "ja-JP_EmiVoice"
         else:
-            voice = "US_LisaVoice"
+            voice = "en-US_AllisonVoice"
 
         text_to_speech = TextToSpeechV1(username=usr,password=pwd)
 
@@ -76,19 +76,61 @@ def mp3play(filename):
         sys.exit()
 
 #---------------------------------------------------
-def main():
+def translator(text, source="ja", target="en"):
+    """
+    テキストデータを翻訳する
+    @param  text    翻訳するテキストデータ
+    @param  source  変換元のテキストのロケール
+    @param  target  変換先のテキストのロケール
+    @return 変換後のテキストデータ
+    """
+    from watson_developer_cloud import LanguageTranslatorV3
 
-    filename = 'test.mp3'
-    text = "東京の今日の天気は晴れ、最高気温は25度、最低気温は19度の予報です。"
+    try:
+        # IBM Cloud param
+        inifile = configparser.ConfigParser()
+        inifile.read('./config.ini', 'UTF-8')
+        url = inifile.get('language translator', 'url')
+        key = inifile.get('language translator', 'key')
 
-    #text_speech(filename, text)
+        version = "2018-09-16"
+
+        translator = LanguageTranslatorV3(version=version,iam_apikey=key,url=url)
+
+        translated_data = translator.translate(text=text, source=source,target=target)
+
+        translated_result = translated_data.get_result()
+        translated_text   = translated_result['translations'][0]['translation']
+
+        return translated_text
+
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit()
+
+#---------------------------------------------------
+def main(filename, text_ja):
+
+    text_en = translator(text_ja, source="ja", target="en")
+    text_speech(filename, text_en, locale="en")
     mp3play(filename)
 
 #---------------------------------------------------
 if __name__ == "__main__":
-    #argv = sys.argv
-    #argc = len(argv)  # 引数の個数
 
-    main()
+    argv = sys.argv
+    argc = len(argv)  # 引数の個数
+
+    if argc == 3:
+        text_ja  = argv[1]
+        filename = argv[2]
+    elif argc == 2:
+        text_ja  = argv[1]
+        filename = 'sample.mp3'
+    else:
+        text_ja  = "東京の今日の天気は晴れ、最高気温は25度、最低気温は19度の予報です。"
+        filename = 'sample.mp3'
+
+    main(filename, text_ja)
 
     print("done")
