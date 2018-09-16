@@ -38,3 +38,6 @@ media/assets/
 
 *.apk
 *.mp3
+
+config.ini
+memo.md

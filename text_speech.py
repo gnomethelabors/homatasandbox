@@ -1,42 +1,43 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import configparser
 import traceback
 import os,sys
 import csv,json
 
 #---------------------------------------------------
-def text_speech(text, locale):
+def text_speech(filename, text, locale="ja"):
     """
     テキストデータを音声再生する
     @param  text 音声再生するテキストデータ
     @param  locale テキストのロケール
     @return なし
     """
+    from watson_developer_cloud import TextToSpeechV1
+    from os.path import join, dirname
 
-    from watson_developer_cloud import SpeechToTextV1
-    import json
+    try:
+        # IBM Cloud param
+        inifile = configparser.ConfigParser()
+        inifile.read('./config.ini', 'UTF-8')
+        usr = inifile.get('text to speech', 'usr')
+        pwd = inifile.get('text to speech', 'pwd')
 
-    # define
-    user = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    pswd = "xxxxxxxxxxxx"
-    audio_file = open("voice.wav", "rb")
-    cont_type = "audio/wav"
-    lang = "ja-JP_BroadbandModel"
+        if locale == "ja":
+            voice = "ja-JP_EmiVoice"
+        else:
+            voice = "US_LisaVoice"
 
-    # watson connection
-    stt = SpeechToTextV1(username=user, password=pswd)
-    result_json = stt.recognize(audio=audio_file, content_type=cont_type, model=lang)
+        text_to_speech = TextToSpeechV1(username=usr,password=pwd)
 
-    # print
-    for i in range(len(result_json["results"])):
-        print(result_json["results"][i]["alternatives"][0]["transcript"])
+        with open(join(dirname(__file__), filename), 'wb') as audio_file:
+            mp3data = text_to_speech.synthesize(text, accept='audio/mp3', voice=voice).get_result().content
+            audio_file.write(mp3data)
 
-    # json file save
-    result = json.dumps(result_json, indent=2)
-    f = open("result.json", "w")
-    f.write(result)
-    f.close()
+    except Exception as e:
+        traceback.print_exc()
+        sys.exit()
 
 #---------------------------------------------------
 def mp3play(filename):
@@ -52,27 +53,42 @@ def mp3play(filename):
     try:
         pygame.mixer.init()
 
-        pygame.mixer.music.load(filename)  # 音源を読み込み
-        mp3_length = mp3(filename).info.length  # 音源の長さ取得
-        pygame.mixer.music.play(1)  # 再生開始。1の部分を変えるとn回再生(その場合は次の行の秒数も×nすること)
-        #pygame.mixer.music.play(-1)
-        time.sleep(mp3_length + 0.25)  # 再生開始後、音源の長さだけ待つ(0.25待つのは誤差解消)
-        pygame.mixer.music.stop()  # 音源の長さ待ったら再生停止
+        """
+        pygame.mixer.music.load(filename)
+        mp3_length = mp3(filename).info.length
+        pygame.mixer.music.play(1)
+        time.sleep(mp3_length + 0.25)
+        pygame.mixer.music.stop()
+        """
 
-        '''
+        pygame.mixer.music.load(filename)
+        mp3_length = mp3(filename).info.length
+        pygame.mixer.music.play(1)
+        # pygame.mixer.music.play(-1)
+        #time.sleep(mp3_length + 0.25)
+        #pygame.mixer.music.stop()
+
         while True:
             pygame.time.delay(1)
-        '''
 
     except Exception as e:
         traceback.print_exc()
+        sys.exit()
 
 #---------------------------------------------------
 def main():
-    mp3play("Sample Student Speech.mp3")
 
+    filename = 'test.mp3'
+    text = "東京の今日の天気は晴れ、最高気温は25度、最低気温は19度の予報です。"
+
+    #text_speech(filename, text)
+    mp3play(filename)
+
+#---------------------------------------------------
 if __name__ == "__main__":
     #argv = sys.argv
     #argc = len(argv)  # 引数の個数
 
     main()
+
+    print("done")
