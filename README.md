@@ -1,6 +1,6 @@
 homata memo
 -----
-
+* [IBM Cloud](https://www.ibm.com/cloud-computing/jp/ja/)
 
 ### 参考
 
@@ -29,8 +29,25 @@ homata memo
 * [Sample Node.js Application for the IBM Watson Text to Speech Service ](https://github.com/watson-developer-cloud/text-to-speech-nodejs)
 
 
-* [[Python]WatsonのSpeech To Textを使うお話]](https://qiita.com/white0221/items/4135b48195f55ee5414b)
+* [Watson Text to Speech の使い方 日本語テキストを読み上げさせてみよう](https://blog.apar.jp/web/9969/)
+
+
+* [[Python]WatsonのSpeech To Textを使うお話](https://qiita.com/white0221/items/4135b48195f55ee5414b)
 * [WatsonのPython SDKを使ってAPIを叩いてみた 13連発 (絶賛途中)](https://qiita.com/himenoglyph/items/f11cbbaf15794a426c5d)
+
+#### 音声再生
+
+* [PythonでMP3音源を再生する](https://qiita.com/kekeho/items/a0b93695d8a8ac6f1028)
+* [pygame.mixer](http://westplain.sakuraweb.com/translate/pygame/Mixer.cgi#pygame.mixer.Sound)
+
+
+    $ pip install pygame mutagen
+
+
+### process
+
+    $ ibmcloud login
+
 
 
 #### Translator
